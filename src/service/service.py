@@ -85,7 +85,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         raise
 
 
+from fastapi.middleware.cors import CORSMiddleware  # ← add to imports if not already there
+
 app = FastAPI(lifespan=lifespan)
+
+# ✅ CORS Middleware Fix (allow frontend to connect)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can change this to specific frontend URLs later
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 router = APIRouter(dependencies=[Depends(verify_bearer)])
 
 

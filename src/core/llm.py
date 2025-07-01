@@ -64,29 +64,33 @@ ModelT: TypeAlias = (
 
 @cache
 def get_model(model_name: AllModelEnum, /) -> ModelT:
-    # NOTE: models with streaming=True will send tokens as they are generated
-    # if the /stream endpoint is called with stream_tokens=True (the default)
     api_model_name = _MODEL_TABLE.get(model_name)
     if not api_model_name:
         raise ValueError(f"Unsupported model: {model_name}")
 
+    # === OpenAI Direct ===
     if model_name in OpenAIModelName:
-        return ChatOpenAI(model=api_model_name, temperature=0.5, streaming=True)
-    if model_name in OpenAICompatibleName:
-        if not settings.COMPATIBLE_BASE_URL or not settings.COMPATIBLE_MODEL:
-            raise ValueError("OpenAICompatible base url and endpoint must be configured")
-
         return ChatOpenAI(
-            model=settings.COMPATIBLE_MODEL,
+            model=api_model_name,
             temperature=0.5,
             streaming=True,
-            openai_api_base=settings.COMPATIBLE_BASE_URL,
-            openai_api_key=settings.COMPATIBLE_API_KEY,
+            api_key=settings.OPENAI_API_KEY,
         )
-    if model_name in AzureOpenAIModelName:
-        if not settings.AZURE_OPENAI_API_KEY or not settings.AZURE_OPENAI_ENDPOINT:
-            raise ValueError("Azure OpenAI API key and endpoint must be configured")
 
+    # === OpenAI-Compatible (e.g. OpenRouter) ===
+    if model_name in OpenAICompatibleName:
+        if not settings.COMPATIBLE_BASE_URL or not settings.COMPATIBLE_API_KEY:
+            raise ValueError("OpenAI-compatible base URL and API key must be set in .env")
+        return ChatOpenAI(
+            model=api_model_name,
+            temperature=0.5,
+            streaming=True,
+            api_key=settings.COMPATIBLE_API_KEY,
+            base_url=settings.COMPATIBLE_BASE_URL,
+        )
+
+    # === Azure OpenAI ===
+    if model_name in AzureOpenAIModelName:
         return AzureChatOpenAI(
             azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
             deployment_name=api_model_name,
@@ -96,34 +100,49 @@ def get_model(model_name: AllModelEnum, /) -> ModelT:
             timeout=60,
             max_retries=3,
         )
+
+    # === DeepSeek ===
     if model_name in DeepseekModelName:
         return ChatOpenAI(
             model=api_model_name,
             temperature=0.5,
             streaming=True,
-            openai_api_base="https://api.deepseek.com",
-            openai_api_key=settings.DEEPSEEK_API_KEY,
+            api_key=settings.DEEPSEEK_API_KEY,
+            base_url="https://api.deepseek.com",
         )
+
+    # === Anthropic ===
     if model_name in AnthropicModelName:
         return ChatAnthropic(model=api_model_name, temperature=0.5, streaming=True)
+
+    # === Google Bard ===
     if model_name in GoogleModelName:
         return ChatGoogleGenerativeAI(model=api_model_name, temperature=0.5, streaming=True)
+
+    # === Google Vertex AI ===
     if model_name in VertexAIModelName:
         return ChatVertexAI(model=api_model_name, temperature=0.5, streaming=True)
+
+    # === Groq ===
     if model_name in GroqModelName:
-        if model_name == GroqModelName.LLAMA_GUARD_4_12B:
-            return ChatGroq(model=api_model_name, temperature=0.0)
-        return ChatGroq(model=api_model_name, temperature=0.5)
+        return ChatGroq(
+            model=api_model_name,
+            temperature=0.0 if model_name.name.startswith("LLAMA_GUARD") else 0.5,
+        )
+
+    # === AWS Bedrock ===
     if model_name in AWSModelName:
         return ChatBedrock(model_id=api_model_name, temperature=0.5)
+
+    # === Ollama ===
     if model_name in OllamaModelName:
-        if settings.OLLAMA_BASE_URL:
-            chat_ollama = ChatOllama(
-                model=settings.OLLAMA_MODEL, temperature=0.5, base_url=settings.OLLAMA_BASE_URL
-            )
-        else:
-            chat_ollama = ChatOllama(model=settings.OLLAMA_MODEL, temperature=0.5)
-        return chat_ollama
+        return ChatOllama(
+            model=settings.OLLAMA_MODEL,
+            temperature=0.5,
+            base_url=settings.OLLAMA_BASE_URL if settings.OLLAMA_BASE_URL else None,
+        )
+
+    # === Fake/Test Model ===
     if model_name in FakeModelName:
         return FakeToolModel(responses=["This is a test response from the fake model."])
 

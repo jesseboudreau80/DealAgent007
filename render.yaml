@@ -1,8 +1,10 @@
 services:
   - type: web
-    name: deal-agent-api
-    env: python
+    name: dealagent007
+    runtime: python
+    buildCommand: uv sync --frozen && uv cache prune --ci
+    startCommand: uvicorn src.service.service:app --host 0.0.0.0 --port 8000
     plan: free
-    buildCommand: ""
-    startCommand: uvicorn src.service.service:app --host 0.0.0.0 --port 10000
-    autoDeploy: true
+    envVars:
+      - key: AUTH_SECRET
+        value: your-secret-here

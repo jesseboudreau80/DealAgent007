@@ -19,7 +19,7 @@ from langgraph.pregel import Pregel
 from langgraph.types import Command, Interrupt
 from langsmith import Client as LangsmithClient
 
-from agents import DEFAULT_AGENT, get_agent, get_all_agent_info
+from src.agents import DEFAULT_AGENT, get_agent, get_all_agent_info
 from core import settings
 from memory import initialize_database, initialize_store
 from schema import (

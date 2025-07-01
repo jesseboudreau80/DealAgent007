@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableConfig
 
 load_dotenv()
 
-from agents import DEFAULT_AGENT, get_agent  # noqa: E402
+from src.agents import DEFAULT_AGENT, get_agent  # noqa: E402
 
 agent = get_agent(DEFAULT_AGENT)
 

@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage, AIMessageChunk, HumanMessage
 from langgraph.pregel.types import StateSnapshot
 from langgraph.types import Interrupt
 
-from agents.agents import Agent
+from src.agents.agents import Agent
 from schema import ChatHistory, ChatMessage, ServiceMetadata
 from schema.models import OpenAIModelName
 

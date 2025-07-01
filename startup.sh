@@ -1,24 +1,24 @@
 #!/bin/bash
 
 # Log file
-LOGFILE="/workspaces/DealAgent007/startup.log"
+LOGFILE="./startup.log"
 
 echo "🚀 Starting DealAgent007 - $(date)" > $LOGFILE
 
 # === BACKEND ===
 echo "🔧 Starting backend..." >> $LOGFILE
-cd /workspaces/DealAgent007
+cd /opt/render/project/src
 if [ -f "requirements.txt" ]; then
     echo "📦 Installing Python dependencies..." >> $LOGFILE
     pip install -r requirements.txt >> $LOGFILE 2>&1
 fi
 
 echo "🌀 Launching backend with uvicorn..." >> $LOGFILE
-nohup uvicorn service:app --host 0.0.0.0 --port 8000 --reload >> $LOGFILE 2>&1 &
+nohup uvicorn service:app --host 0.0.0.0 --port $PORT --reload >> $LOGFILE 2>&1 &
 
 # === FRONTEND ===
 echo "🔧 Starting frontend..." >> $LOGFILE
-cd /workspaces/DealAgent007/chat-ui
+cd ./chat-ui
 if [ ! -d "node_modules" ]; then
     echo "📦 Installing Node dependencies..." >> $LOGFILE
     npm install >> $LOGFILE 2>&1

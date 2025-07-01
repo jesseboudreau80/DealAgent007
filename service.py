@@ -32,7 +32,7 @@ from schema import (
     StreamInput,
     UserInput,
 )
-from service.utils import (
+from utils import (
     convert_message_content_to_string,
     langchain_to_chat_message,
     remove_tool_calls,
@@ -416,5 +416,8 @@ async def health_check():
 
     return health_status
 
+@app.get("/")
+async def root():
+    return {"message": "Hello from DealAgent007!"}
 
 app.include_router(router)

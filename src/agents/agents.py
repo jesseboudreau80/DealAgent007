@@ -2,14 +2,14 @@ from dataclasses import dataclass
 
 from langgraph.pregel import Pregel
 
-from agents.bg_task_agent.bg_task_agent import bg_task_agent
-from agents.chatbot import chatbot
-from agents.command_agent import command_agent
-from agents.interrupt_agent import interrupt_agent
-from agents.knowledge_base_agent import kb_agent
-from agents.langgraph_supervisor_agent import langgraph_supervisor_agent
-from agents.rag_assistant import rag_assistant
-from agents.research_assistant import research_assistant
+from src.agents.bg_task_agent.bg_task_agent import bg_task_agent
+from src.agents.chatbot import chatbot
+from src.agents.command_agent import command_agent
+from src.agents.interrupt_agent import interrupt_agent
+from src.agents.knowledge_base_agent import kb_agent
+from src.agents.langgraph_supervisor_agent import langgraph_supervisor_agent
+from src.agents.rag_assistant import rag_assistant
+from src.agents.research_assistant import research_assistant
 from schema import AgentInfo
 
 DEFAULT_AGENT = "research-assistant"

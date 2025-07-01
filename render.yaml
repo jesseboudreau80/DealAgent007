@@ -7,4 +7,16 @@ services:
     startCommand: bash startup.sh
     envVars:
       - key: AUTH_SECRET
-        value: your-secret-here
+        value: pawsitive-secret-token
+
+      - key: COMPATIBLE_API_KEY
+        value: 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
+
+      - key: COMPATIBLE_MODEL
+        value: openai/gpt-4o
+
+      - key: COMPATIBLE_BASE_URL
+        value: https://openrouter.ai/api/v1
+      
+      - key: DEFAULT_MODEL
+        value: gpt-4o

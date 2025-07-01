@@ -9,7 +9,7 @@ from agents.agents import Agent
 from agents.utils import CustomData
 from client import AgentClient
 from schema.schema import ChatMessage
-from service.utils import langchain_to_chat_message
+from utils import langchain_to_chat_message
 
 START_MESSAGE = CustomData(type="start", data={"key1": "value1", "key2": 123})
 

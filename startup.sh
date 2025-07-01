@@ -14,7 +14,7 @@ if [ -f "requirements.txt" ]; then
 fi
 
 echo "🌀 Launching backend with uvicorn..." >> $LOGFILE
-nohup uvicorn service:app --host 0.0.0.0 --port $PORT --reload >> $LOGFILE 2>&1 &
+nohup uvicorn service:app --host 0.0.0.0 --port $PORT >> $LOGFILE 2>&1 &
 
 # === FRONTEND ===
 echo "🔧 Starting frontend..." >> $LOGFILE

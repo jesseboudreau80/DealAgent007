@@ -6,29 +6,34 @@ function App() {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
 
+  // ✅ Environment variables at top level
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  const authToken = import.meta.env.VITE_AUTH_SECRET;
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-    const authSecret = import.meta.env.VITE_AUTH_SECRET || '';
-
-    const res = await axios.post(
-      `${baseUrl}/invoke?agent_id=research-assistant`,
-      { message: input }, // backend expects 'message'
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authSecret}`, // Add this line
+    try {
+      const { data } = await axios.post(
+        `${apiUrl}/invoke`, // 🔁 update this path to your real backend endpoint
+        {
+          message: input // send user input
         },
-      }
-    );
-    setResponse(res.data.content || 'No content');
-  } catch (err) {
-    console.error('Error:', err);
-    setResponse('Error occurred. Check console for details.');
-  }
-};
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      console.log(data);
+      setResponse(data.response || JSON.stringify(data, null, 2)); // display response
+    } catch (error) {
+      console.error('Error:', error);
+      setResponse(`Error: ${error.message}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center px-4">

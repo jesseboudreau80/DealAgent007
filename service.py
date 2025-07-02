@@ -80,7 +80,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan)
 
 # Serve React frontend
-# Serve React frontend
 frontend_path = "chat-ui/build"
 app.mount("/static", StaticFiles(directory=f"{frontend_path}/static"), name="static")
 
@@ -95,15 +94,7 @@ async def serve_spa(full_path: str):
         return FileResponse(file_path)
     return FileResponse(f"{frontend_path}/index.html")
 
-# If using API-only render deploy, you can keep this and disable frontend mount
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
+# router and auth
 router = APIRouter(dependencies=[Depends(verify_bearer)])
 
 
@@ -154,8 +145,8 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     return {"input": input_data, "config": config}, run_id
 
 
-@router.post("/{agent_id}/invoke")
-@router.post("/invoke")
+@router.post("/{agent_id}/invoke", response_model=ChatMessage)
+@router.post("/invoke", response_model=ChatMessage)
 async def invoke(user_input: UserInput, agent_id: str = DEFAULT_AGENT) -> ChatMessage:
     agent = get_agent(agent_id)
     kwargs, run_id = await _handle_input(user_input, agent)
@@ -178,7 +169,14 @@ async def invoke(user_input: UserInput, agent_id: str = DEFAULT_AGENT) -> ChatMe
         raise HTTPException(status_code=500, detail="Unexpected error")
 
 
-@router.post("/{agent_id}/stream", response_class=StreamingResponse)
+@router.post("/{agent_id}/stream", response_class=StreamingResponse, response_model=None)
+@router.post("/stream", response_class=StreamingResponse, response_model=None)
+async def stream(user_input: StreamInput, agent_id: str = DEFAULT_AGENT):
+    return StreamingResponse(
+        message_generator(user_input, agent_id),
+        media_type="text/event-stream",
+    )
+
 
 async def message_generator(user_input: StreamInput, agent_id: str = DEFAULT_AGENT) -> AsyncGenerator[str, None]:
     agent: Pregel = get_agent(agent_id)
@@ -267,15 +265,7 @@ async def message_generator(user_input: StreamInput, agent_id: str = DEFAULT_AGE
         yield "data: [DONE]\n\n"
 
 
-@router.post("/stream", response_class=StreamingResponse)
-async def stream(user_input: StreamInput, agent_id: str = DEFAULT_AGENT):
-    return StreamingResponse(
-        message_generator(user_input, agent_id),
-        media_type="text/event-stream",
-    )
-
-
-@router.post("/feedback")
+@router.post("/feedback", response_model=FeedbackResponse)
 async def feedback(feedback: Feedback) -> FeedbackResponse:
     client = LangsmithClient()
     kwargs = feedback.kwargs or {}
@@ -288,7 +278,7 @@ async def feedback(feedback: Feedback) -> FeedbackResponse:
     return FeedbackResponse()
 
 
-@router.post("/history")
+@router.post("/history", response_model=ChatHistory)
 def history(input: ChatHistoryInput) -> ChatHistory:
     agent = get_agent(DEFAULT_AGENT)
     try:

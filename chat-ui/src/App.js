@@ -36,14 +36,24 @@ function App() {
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split("\n").filter(line => line.trim() !== "");
 
-        for (let line of lines) {
-          if (line.startsWith("data: ")) {
-            const json = JSON.parse(line.replace("data: ", ""));
-            if (json.type === "message" && json.content?.content) {
-              setResponse(prev => prev + json.content.content);
-            }
-          }
-        }
+for (let line of lines) {
+  // Skip done signal
+  if (line.trim() === "[DONE]") continue;
+
+  // Strip "data: " if present
+  if (line.startsWith("data: ")) {
+    line = line.replace("data: ", "");
+  }
+
+  try {
+    const json = JSON.parse(line);
+    if (json.type === "message" && json.content?.content) {
+      setResponse(prev => prev + json.content.content);
+    }
+  } catch (e) {
+    console.warn("Skipping invalid JSON line:", line);
+  }
+}
       }
     } catch (error) {
       console.error('Streaming error:', error);

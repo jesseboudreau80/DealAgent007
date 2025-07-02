@@ -11,12 +11,13 @@ function App() {
 
     try {
       const res = await axios.post(
-        'https://probable-journey-wr9rx5j46554cq74-8000.app.github.dev/invoke?agent_id=research-assistant',
-        { input }
+        '/invoke?agent_id=research-assistant',
+        { message: input }, // ✅ FIX: match backend's expected schema
+        { headers: { 'Content-Type': 'application/json' } }
       );
       setResponse(res.data.content || 'No content');
     } catch (err) {
-      console.error(err);
+      console.error('Error:', err);
       setResponse('Error occurred. Check console for details.');
     }
   };

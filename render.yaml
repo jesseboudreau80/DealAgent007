@@ -3,9 +3,15 @@ services:
     name: dealagent007
     runtime: python
     plan: free
-    buildCommand: uv sync --frozen && uv cache prune --ci
+    buildCommand: |
+      cd chat-ui
+      npm install
+      npm run build
     startCommand: bash startup.sh
     envVars:
+      - key: PORT
+        value: 8000
+
       - key: COMPATIBLE_MODEL
         value: openai/gpt-4o
 

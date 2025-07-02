@@ -4,34 +4,23 @@ services:
     runtime: python
     plan: free
     buildCommand: |
-      cd chat-ui
-      npm install
-      npm run build
+      cd chat-ui && npm install && npm run build && cd ..
+      uv sync --frozen && uv cache prune --ci
     startCommand: bash startup.sh
     envVars:
-      - key: PORT
-        value: 8000
-
       - key: COMPATIBLE_MODEL
         value: openai/gpt-4o
-
       - key: COMPATIBLE_BASE_URL
         value: https://openrouter.ai/api/v1
-
       - key: DEFAULT_MODEL
         value: gpt-4o
-
       - key: USE_FAKE_MODEL
         value: "false"
-
       - key: USE_AWS_BEDROCK
         value: "false"
-
       - key: DATABASE_TYPE
         value: sqlite
-
       - key: SQLITE_DB_PATH
         value: ./data/dev.sqlite
-
       - key: PYTHONPATH
         value: /opt/render/project/src

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import './index.css';
-import axios from 'axios';
 
 function App() {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
-  const [responseData, setResponseData] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const apiUrl = "https://dealagent007.onrender.com";
@@ -14,29 +11,44 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!input.trim()) return;
 
     setIsLoading(true);
     setResponse('');
-    setResponseData(null);
 
     try {
-      const { data } = await axios.post(
-        `${apiUrl}/invoke`,
-        { message: input },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`,
-          },
-        }
-      );
+      const res = await fetch(`${apiUrl}/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ message: input }),
+      });
 
-      setResponse(data.content || "No response content found.");
-      setResponseData(data);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let finalMessage = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n").filter(line => line.trim() !== "");
+
+        for (let line of lines) {
+          if (line.startsWith("data: ")) {
+            const json = JSON.parse(line.replace("data: ", ""));
+            if (json.type === "message" && json.content?.content) {
+              finalMessage += json.content.content;
+              setResponse(prev => prev + json.content.content);
+            }
+          }
+        }
+      }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Streaming error:', error);
       setResponse(`Error: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -75,22 +87,7 @@ function App() {
       {response && (
         <div className="mt-6 w-full max-w-xl p-4 bg-gray-800 rounded border border-gray-700">
           <h2 className="text-lg font-semibold mb-2">Response:</h2>
-          <p className="whitespace-pre-line mb-4">{response}</p>
-          {responseData && (
-            <>
-              <button
-                onClick={() => setShowDetails(!showDetails)}
-                className="text-sm text-indigo-400 underline"
-              >
-                {showDetails ? 'Hide Details' : 'Show Details'}
-              </button>
-              {showDetails && (
-                <pre className="mt-2 text-xs text-gray-400 bg-gray-900 p-2 rounded overflow-x-auto">
-                  {JSON.stringify(responseData, null, 2)}
-                </pre>
-              )}
-            </>
-          )}
+          <p className="whitespace-pre-line">{response}</p>
         </div>
       )}
     </div>

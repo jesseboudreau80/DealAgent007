@@ -4,8 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: |
-      cd chat-ui && npm install && npm run build && cd ..
-      uv sync --frozen && uv cache prune --ci
+      cd chat-ui && npm install && npm run build && cd .. && uv sync --frozen && uv cache prune --ci
     startCommand: bash startup.sh
     envVars:
       - key: COMPATIBLE_MODEL

@@ -28,7 +28,6 @@ function App() {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder('utf-8');
-      let finalMessage = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -41,7 +40,6 @@ function App() {
           if (line.startsWith("data: ")) {
             const json = JSON.parse(line.replace("data: ", ""));
             if (json.type === "message" && json.content?.content) {
-              finalMessage += json.content.content;
               setResponse(prev => prev + json.content.content);
             }
           }

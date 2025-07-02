@@ -7,13 +7,19 @@ function App() {
   const [response, setResponse] = useState('');
   const [responseData, setResponseData] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Hardcoded to avoid env build-time issues
   const apiUrl = "https://dealagent007.onrender.com";
   const authToken = "pawsitive-secret-token";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!input.trim()) return;
+
+    setIsLoading(true);
+    setResponse('');
+    setResponseData(null);
 
     try {
       const { data } = await axios.post(
@@ -27,13 +33,20 @@ function App() {
         }
       );
 
-      console.log(data);
       setResponse(data.content || "No response content found.");
       setResponseData(data);
     } catch (error) {
       console.error('Error:', error);
       setResponse(`Error: ${error.message}`);
-      setResponseData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
@@ -46,14 +59,16 @@ function App() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Ask me anything..."
           className="w-full p-3 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <button
           type="submit"
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50"
+          disabled={isLoading}
         >
-          Send
+          {isLoading ? 'Thinking...' : 'Send'}
         </button>
       </form>
 

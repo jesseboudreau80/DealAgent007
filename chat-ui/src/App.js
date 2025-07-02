@@ -5,8 +5,10 @@ import axios from 'axios';
 function App() {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
+  const [responseData, setResponseData] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
 
-  // ✅ Environment variables at top level
+  // ✅ Hardcoded to avoid env build-time issues
   const apiUrl = "https://dealagent007.onrender.com";
   const authToken = "pawsitive-secret-token";
 
@@ -15,10 +17,8 @@ function App() {
 
     try {
       const { data } = await axios.post(
-        `${apiUrl}/invoke`, // 🔁 update this path to your real backend endpoint
-        {
-          message: input // send user input
-        },
+        `${apiUrl}/invoke`,
+        { message: input },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -28,10 +28,12 @@ function App() {
       );
 
       console.log(data);
-      setResponse(data.response || JSON.stringify(data, null, 2)); // display response
+      setResponse(data.content || "No response content found.");
+      setResponseData(data);
     } catch (error) {
       console.error('Error:', error);
       setResponse(`Error: ${error.message}`);
+      setResponseData(null);
     }
   };
 
@@ -58,7 +60,22 @@ function App() {
       {response && (
         <div className="mt-6 w-full max-w-xl p-4 bg-gray-800 rounded border border-gray-700">
           <h2 className="text-lg font-semibold mb-2">Response:</h2>
-          <p className="whitespace-pre-line">{response}</p>
+          <p className="whitespace-pre-line mb-4">{response}</p>
+          {responseData && (
+            <>
+              <button
+                onClick={() => setShowDetails(!showDetails)}
+                className="text-sm text-indigo-400 underline"
+              >
+                {showDetails ? 'Hide Details' : 'Show Details'}
+              </button>
+              {showDetails && (
+                <pre className="mt-2 text-xs text-gray-400 bg-gray-900 p-2 rounded overflow-x-auto">
+                  {JSON.stringify(responseData, null, 2)}
+                </pre>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>

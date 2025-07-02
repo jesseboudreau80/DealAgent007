@@ -19,7 +19,7 @@ function App() {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authSecret}`,  // <-- added this
+          Authorization: `Bearer ${process.env.VITE_AUTH_SECRET}`, // Add this line
         },
       }
     );

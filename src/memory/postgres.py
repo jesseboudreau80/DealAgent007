@@ -4,7 +4,7 @@ from contextlib import AbstractAsyncContextManager
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.store.postgres import AsyncPostgresStore
 
-from core.settings import settings
+from src.core.settings import settings
 
 logger = logging.getLogger(__name__)
 

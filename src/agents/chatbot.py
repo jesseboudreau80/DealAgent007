@@ -2,7 +2,7 @@ from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.func import entrypoint
 
-from core import get_model, settings
+from src.core import get_model, settings
 
 
 @entrypoint()

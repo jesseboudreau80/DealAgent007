@@ -1,7 +1,7 @@
 from langgraph.prebuilt import create_react_agent
 from langgraph_supervisor import create_supervisor
 
-from core import get_model, settings
+from src.core import get_model, settings
 
 model = get_model(settings.DEFAULT_MODEL)
 

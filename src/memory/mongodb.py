@@ -4,7 +4,7 @@ from contextlib import AbstractAsyncContextManager
 
 from langgraph.checkpoint.mongodb.aio import AsyncMongoDBSaver
 
-from core.settings import settings
+from src.core.settings import settings
 
 logger = logging.getLogger(__name__)
 

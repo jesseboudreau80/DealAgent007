@@ -1,7 +1,7 @@
 import asyncio
 
-from client import AgentClient
-from core import settings
+from src.client import AgentClient
+from src.core import settings
 from src.schema import ChatMessage
 
 

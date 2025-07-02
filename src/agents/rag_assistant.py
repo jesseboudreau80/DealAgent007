@@ -14,7 +14,7 @@ from langgraph.prebuilt import ToolNode
 
 from src.agents.llama_guard import LlamaGuard, LlamaGuardOutput, SafetyAssessment
 from src.agents.tools import database_search
-from core import get_model, settings
+from src.core import get_model, settings
 
 
 class AgentState(MessagesState, total=False):

@@ -10,7 +10,7 @@ from langchain_core.runnables.base import RunnableSequence
 from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.managed import RemainingSteps
 
-from core import get_model, settings
+from src.core import get_model, settings
 
 logger = logging.getLogger(__name__)
 

@@ -12,7 +12,7 @@ from langgraph.store.base import BaseStore
 from langgraph.types import interrupt
 from pydantic import BaseModel, Field
 
-from core import get_model, settings
+from src.core import get_model, settings
 
 # Added logger
 logger = logging.getLogger(__name__)

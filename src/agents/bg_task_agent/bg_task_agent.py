@@ -7,7 +7,7 @@ from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.types import StreamWriter
 
 from src.agents.bg_task_agent.task import Task
-from core import get_model, settings
+from src.core import get_model, settings
 
 
 class AgentState(MessagesState, total=False):

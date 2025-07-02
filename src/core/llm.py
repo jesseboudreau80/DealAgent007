@@ -10,7 +10,7 @@ from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 
-from core.settings import settings
+from src.core.settings import settings
 from src.schema.models import (
     AllModelEnum,
     AnthropicModelName,

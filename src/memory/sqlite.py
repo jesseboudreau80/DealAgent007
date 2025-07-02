@@ -3,7 +3,7 @@ from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.store.memory import InMemoryStore
 
-from core.settings import settings
+from src.core.settings import settings
 
 
 def get_sqlite_saver() -> AbstractAsyncContextManager[AsyncSqliteSaver]:

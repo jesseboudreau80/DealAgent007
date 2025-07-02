@@ -185,7 +185,7 @@ cython_debug/
 
 # Chroma db
 *.db
-*.sqlite3
+# *.sqlite3
 *.bin
 
 # Private Credentials, ignore everything in the folder but the .gitkeep file

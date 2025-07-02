@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Literal
 
-from langchain_community.tools import DuckDuckGoSearchResults, OpenWeatherMapQueryRun
+# from langchain_community.tools import DuckDuckGoSearchResults
+from langchain_community.tools import OpenWeatherMapQueryRun  # keep this if you use weather
 from langchain_community.utilities import OpenWeatherMapAPIWrapper
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, SystemMessage
@@ -25,8 +26,8 @@ class AgentState(MessagesState, total=False):
     remaining_steps: RemainingSteps
 
 
-web_search = DuckDuckGoSearchResults(name="WebSearch")
-tools = [web_search, calculator]
+# web_search = DuckDuckGoSearchResults(name="WebSearch")
+tools = [calculator]
 
 # Add weather tool if API key is set
 # Register for an API key at https://openweathermap.org/api/

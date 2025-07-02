@@ -7,8 +7,8 @@ function App() {
   const [response, setResponse] = useState('');
 
   // ✅ Environment variables at top level
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-  const authToken = import.meta.env.VITE_AUTH_SECRET;
+  const apiUrl = "https://dealagent007.onrender.com";
+  const authToken = "pawsitive-secret-token";
 
   const handleSubmit = async (e) => {
     e.preventDefault();

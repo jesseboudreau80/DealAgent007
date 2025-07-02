@@ -1,3 +1,4 @@
+import os
 import inspect
 import json
 import logging
@@ -79,11 +80,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan)
 
 # Serve React frontend
-app.mount("/", StaticFiles(directory="chat-ui/build", html=True), name="static")
+# Serve React frontend
+frontend_path = "chat-ui/build"
+app.mount("/static", StaticFiles(directory=f"{frontend_path}/static"), name="static")
+
+@app.get("/")
+async def serve_root():
+    return FileResponse(f"{frontend_path}/index.html")
 
 @app.get("/{full_path:path}")
-async def serve_spa():
-    return FileResponse("chat-ui/build/index.html")
+async def serve_spa(full_path: str):
+    file_path = os.path.join(frontend_path, full_path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    return FileResponse(f"{frontend_path}/index.html")
 
 # If using API-only render deploy, you can keep this and disable frontend mount
 # app.add_middleware(

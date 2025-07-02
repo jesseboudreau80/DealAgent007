@@ -7,20 +7,28 @@ function App() {
   const [response, setResponse] = useState('');
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await axios.post(
-        '/invoke?agent_id=research-assistant',
-        { message: input }, // ✅ FIX: match backend's expected schema
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-      setResponse(res.data.content || 'No content');
-    } catch (err) {
-      console.error('Error:', err);
-      setResponse('Error occurred. Check console for details.');
-    }
-  };
+  try {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    const authSecret = import.meta.env.VITE_AUTH_SECRET || '';
+
+    const res = await axios.post(
+      `${baseUrl}/invoke?agent_id=research-assistant`,
+      { message: input }, // backend expects 'message'
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authSecret}`,  // <-- added this
+        },
+      }
+    );
+    setResponse(res.data.content || 'No content');
+  } catch (err) {
+    console.error('Error:', err);
+    setResponse('Error occurred. Check console for details.');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center px-4">

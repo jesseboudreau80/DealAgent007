@@ -32,7 +32,7 @@ from src.schema import (
     StreamInput,
     UserInput,
 )
-from src.utils import (
+from utils import (
     convert_message_content_to_string,
     langchain_to_chat_message,
     remove_tool_calls,

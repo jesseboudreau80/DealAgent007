@@ -6,12 +6,6 @@ services:
     buildCommand: uv sync --frozen && uv cache prune --ci
     startCommand: bash startup.sh
     envVars:
-      - key: AUTH_SECRET
-        fromEnvVar: AUTH_SECRET
-
-      - key: COMPATIBLE_API_KEY
-        fromEnvVar: COMPATIBLE_API_KEY
-
       - key: COMPATIBLE_MODEL
         value: openai/gpt-4o
 
@@ -21,26 +15,17 @@ services:
       - key: DEFAULT_MODEL
         value: gpt-4o
 
-      - key: OPENAI_API_KEY
-        fromEnvVar: OPENAI_API_KEY
-
       - key: USE_FAKE_MODEL
         value: "false"
 
       - key: USE_AWS_BEDROCK
         value: "false"
 
-      - key: HOST
-        value: 0.0.0.0
-
-      - key: PORT
-        value: "8080"
-
-      - key: MODE
-        value: dev
-
       - key: DATABASE_TYPE
         value: sqlite
 
       - key: SQLITE_DB_PATH
         value: ./data/dev.sqlite
+
+      - key: PYTHONPATH
+        value: /opt/render/project/src

@@ -22,7 +22,7 @@ from langsmith import Client as LangsmithClient
 from src.agents import DEFAULT_AGENT, get_agent, get_all_agent_info
 from core import settings
 from memory import initialize_database, initialize_store
-from schema import (
+from src.schema import (
     ChatHistory,
     ChatHistoryInput,
     ChatMessage,

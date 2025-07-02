@@ -6,7 +6,7 @@ import pytest
 from pydantic import SecretStr, ValidationError
 
 from core.settings import Settings, check_str_is_http
-from schema.models import (
+from src.schema.models import (
     AnthropicModelName,
     AzureOpenAIModelName,
     OpenAIModelName,

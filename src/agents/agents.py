@@ -10,7 +10,7 @@ from src.agents.knowledge_base_agent import kb_agent
 from src.agents.langgraph_supervisor_agent import langgraph_supervisor_agent
 from src.agents.rag_assistant import rag_assistant
 from src.agents.research_assistant import research_assistant
-from schema import AgentInfo
+from src.schema import AgentInfo
 
 DEFAULT_AGENT = "research-assistant"
 

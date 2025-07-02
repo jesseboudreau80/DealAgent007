@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PYTHONPATH=/workspaces/DealAgent007
+
 # Log file
 LOGFILE="./startup.log"
 
@@ -14,6 +16,7 @@ if [ -f "requirements.txt" ]; then
 fi
 
 echo "🌀 Launching backend with uvicorn..." >> $LOGFILE
+export PYTHONPATH=$(pwd)
 nohup uvicorn service:app --host 0.0.0.0 --port $PORT >> $LOGFILE 2>&1 &
 
 # === FRONTEND ===

@@ -8,7 +8,7 @@ from langgraph.types import StreamWriter
 from src.agents.agents import Agent
 from src.agents.utils import CustomData
 from client import AgentClient
-from schema.schema import ChatMessage
+from src.schema.schema import ChatMessage
 from utils import langchain_to_chat_message
 
 START_MESSAGE = CustomData(type="start", data={"key1": "value1", "key2": 123})

@@ -6,8 +6,8 @@ import pytest
 from httpx import Request, Response
 
 from client import AgentClient, AgentClientError
-from schema import AgentInfo, ChatHistory, ChatMessage, ServiceMetadata
-from schema.models import OpenAIModelName
+from src.schema import AgentInfo, ChatHistory, ChatMessage, ServiceMetadata
+from src.schema.models import OpenAIModelName
 
 
 def test_init(mock_env):

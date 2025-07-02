@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
-from schema import AgentInfo, ServiceMetadata
-from schema.models import OpenAIModelName
+from src.schema import AgentInfo, ServiceMetadata
+from src.schema.models import OpenAIModelName
 
 
 @pytest.fixture

@@ -5,7 +5,7 @@ from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
 from core import get_model, settings
-from schema.models import GroqModelName
+from src.schema.models import GroqModelName
 
 
 class SafetyAssessment(Enum):

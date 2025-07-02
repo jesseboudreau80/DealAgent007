@@ -5,8 +5,8 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 from client import AgentClientError
-from schema import ChatHistory, ChatMessage
-from schema.models import OpenAIModelName
+from src.schema import ChatHistory, ChatMessage
+from src.schema.models import OpenAIModelName
 
 
 def test_app_simple_non_streaming(mock_agent_client):

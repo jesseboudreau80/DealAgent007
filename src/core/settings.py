@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     USE_FAKE_MODEL: bool = False
     AZURE_OPENAI_API_KEY: SecretStr | None = None
 
+    # Which model to use by default when none is specified
+    DEFAULT_MODEL: AllModelEnum = AllModelEnum.GPT_4O_MINI
+
     @computed_field
     def api_keys(self) -> dict[Provider, Any]:
         return {

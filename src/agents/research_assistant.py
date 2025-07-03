@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Any
 
 # Tools and utilities
 from src.agents.tools import calculator
@@ -29,7 +29,7 @@ class AgentState(MessagesState, total=False):
 
 
 # === Tool registration ===
-tools = [calculator]
+tools: list[Any] = [calculator]
 
 # Tavily search (requires TAVILY_API_KEY)
 if settings.TAVILY_API_KEY:
@@ -179,7 +179,9 @@ agent.add_edge("tools", "model")
 # After model, if it has tool_calls, run tools, else END
 agent.add_conditional_edges(
     "model",
-    lambda s: "tools" if isinstance(s["messages"][-1], AIMessage) and s["messages"][-1].tool_calls else "done",
+    lambda s: "tools"
+    if isinstance(s["messages"][-1], AIMessage) and s["messages"][-1].tool_calls
+    else "done",
     {"tools": "tools", "done": END},
 )
 

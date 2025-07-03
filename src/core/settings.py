@@ -1,44 +1,37 @@
-from enum import StrEnum
-from json import loads
-from typing import Annotated, Any
+# src/core/settings.py
+
+import json
+from typing import Any, Annotated
 
 from dotenv import find_dotenv
-from pydantic import (
-    BeforeValidator,
-    Field,
-    HttpUrl,
-    SecretStr,
-    TypeAdapter,
-    computed_field,
-)
+from pydantic import SecretStr, Field, computed_field, BeforeValidator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from src.schema.models import (
-    AllModelEnum,
-    AnthropicModelName,
-    AWSModelName,
-    AzureOpenAIModelName,
-    DeepseekModelName,
-    FakeModelName,
-    GoogleModelName,
-    GroqModelName,
-    OllamaModelName,
-    OpenAICompatibleName,
-    OpenAIModelName,
+from .enums import (
     Provider,
+    AllModelEnum,
+    OpenAIModelName,
+    OpenAICompatibleName,
+    DeepseekModelName,
+    AnthropicModelName,
+    GoogleModelName,
     VertexAIModelName,
+    GroqModelName,
+    AWSModelName,
+    OllamaModelName,
+    FakeModelName,
+    AzureOpenAIModelName,
+    DatabaseType,
 )
 
 
-class DatabaseType(StrEnum):
-    SQLITE = "sqlite"
-    POSTGRES = "postgres"
-    MONGO = "mongo"
-
-
-def check_str_is_http(x: str) -> str:
-    http_url_adapter = TypeAdapter(HttpUrl)
-    return str(http_url_adapter.validate_python(x))
+def check_str_is_http(v: str) -> str:
+    """
+    Simple validator to ensure a string starts with http:// or https://
+    """
+    if not (v.startswith("http://") or v.startswith("https://")):
+        raise ValueError("URL must start with http:// or https://")
+    return v
 
 
 class Settings(BaseSettings):
@@ -49,13 +42,14 @@ class Settings(BaseSettings):
         extra="ignore",
         validate_default=False,
     )
-    MODE: str | None = None
 
+    # App mode & network
+    MODE: str | None = None
     HOST: str = "0.0.0.0"
     PORT: int = 8080
-
     AUTH_SECRET: SecretStr | None = None
 
+    # LLM provider keys
     OPENAI_API_KEY: SecretStr | None = None
     DEEPSEEK_API_KEY: SecretStr | None = None
     ANTHROPIC_API_KEY: SecretStr | None = None
@@ -67,17 +61,21 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str | None = None
     USE_FAKE_MODEL: bool = False
 
-    # If DEFAULT_MODEL is None, it will be set in model_post_init
-    DEFAULT_MODEL: AllModelEnum | None = None  # type: ignore[assignment]
-    AVAILABLE_MODELS: set[AllModelEnum] = set()  # type: ignore[assignment]
+    # Agent defaults
+    DEFAULT_MODEL: AllModelEnum | None = None
+    AVAILABLE_MODELS: set[AllModelEnum] = set()
 
-    # Set openai compatible api, mainly used for proof of concept
+    # Compatible API (OpenAI‐like)
     COMPATIBLE_MODEL: str | None = None
     COMPATIBLE_API_KEY: SecretStr | None = None
     COMPATIBLE_BASE_URL: str | None = None
 
+    # Extra service keys
     OPENWEATHERMAP_API_KEY: SecretStr | None = None
+    SERPAPI_API_KEY: SecretStr | None = None
+    TAVILY_API_KEY: SecretStr | None = None
 
+    # LangChain tracing / endpoints
     LANGCHAIN_TRACING_V2: bool = False
     LANGCHAIN_PROJECT: str = "default"
     LANGCHAIN_ENDPOINT: Annotated[str, BeforeValidator(check_str_is_http)] = (
@@ -85,25 +83,24 @@ class Settings(BaseSettings):
     )
     LANGCHAIN_API_KEY: SecretStr | None = None
 
+    # Langfuse tracing / endpoints
     LANGFUSE_TRACING: bool = False
-    LANGFUSE_HOST: Annotated[str, BeforeValidator(check_str_is_http)] = "https://cloud.langfuse.com"
+    LANGFUSE_HOST: Annotated[str, BeforeValidator(check_str_is_http)] = (
+        "https://cloud.langfuse.com"
+    )
     LANGFUSE_PUBLIC_KEY: SecretStr | None = None
     LANGFUSE_SECRET_KEY: SecretStr | None = None
 
-    # Database Configuration
-    DATABASE_TYPE: DatabaseType = (
-        DatabaseType.SQLITE
-    )  # Options: DatabaseType.SQLITE or DatabaseType.POSTGRES
+    # Database
+    DATABASE_TYPE: DatabaseType = DatabaseType.SQLITE
     SQLITE_DB_PATH: str = "checkpoints.db"
 
-    # PostgreSQL Configuration
     POSTGRES_USER: str | None = None
     POSTGRES_PASSWORD: SecretStr | None = None
     POSTGRES_HOST: str | None = None
     POSTGRES_PORT: int | None = None
     POSTGRES_DB: str | None = None
 
-    # MongoDB Configuration
     MONGO_HOST: str | None = None
     MONGO_PORT: int | None = None
     MONGO_DB: str | None = None
@@ -111,15 +108,17 @@ class Settings(BaseSettings):
     MONGO_PASSWORD: SecretStr | None = None
     MONGO_AUTH_SOURCE: str | None = None
 
-    # Azure OpenAI Settings
+    # Azure OpenAI
     AZURE_OPENAI_API_KEY: SecretStr | None = None
-    AZURE_OPENAI_ENDPOINT: str | None = None
+    AZURE_OPENAI_ENDPOINT: Annotated[str, BeforeValidator(check_str_is_http)] | None = None
     AZURE_OPENAI_API_VERSION: str = "2024-02-15-preview"
-    AZURE_OPENAI_DEPLOYMENT_MAP: dict[str, str] = Field(
-        default_factory=dict, description="Map of model names to Azure deployment IDs"
-    )
+    AZURE_OPENAI_DEPLOYMENT_MAP: dict[str, str] = Field(default_factory=dict)
 
     def model_post_init(self, __context: Any) -> None:
+        """
+        Populate DEFAULT_MODEL and AVAILABLE_MODELS based on which keys are set,
+        and validate any provider‐specific requirements (e.g. Azure deployments).
+        """
         api_keys = {
             Provider.OPENAI: self.OPENAI_API_KEY,
             Provider.OPENAI_COMPATIBLE: self.COMPATIBLE_BASE_URL and self.COMPATIBLE_MODEL,
@@ -133,82 +132,74 @@ class Settings(BaseSettings):
             Provider.FAKE: self.USE_FAKE_MODEL,
             Provider.AZURE_OPENAI: self.AZURE_OPENAI_API_KEY,
         }
-        active_keys = [k for k, v in api_keys.items() if v]
-        if not active_keys:
+        active = [p for p, key in api_keys.items() if key]
+        if not active:
             raise ValueError("At least one LLM API key must be provided.")
 
-        for provider in active_keys:
+        for provider in active:
             match provider:
                 case Provider.OPENAI:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = OpenAIModelName.GPT_4O_MINI
-                    self.AVAILABLE_MODELS.update(set(OpenAIModelName))
+                    self.AVAILABLE_MODELS.update(OpenAIModelName)
                 case Provider.OPENAI_COMPATIBLE:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = OpenAICompatibleName.OPENAI_COMPATIBLE
-                    self.AVAILABLE_MODELS.update(set(OpenAICompatibleName))
+                    self.AVAILABLE_MODELS.update(OpenAICompatibleName)
                 case Provider.DEEPSEEK:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = DeepseekModelName.DEEPSEEK_CHAT
-                    self.AVAILABLE_MODELS.update(set(DeepseekModelName))
+                    self.AVAILABLE_MODELS.update(DeepseekModelName)
                 case Provider.ANTHROPIC:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = AnthropicModelName.HAIKU_3
-                    self.AVAILABLE_MODELS.update(set(AnthropicModelName))
+                    self.AVAILABLE_MODELS.update(AnthropicModelName)
                 case Provider.GOOGLE:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = GoogleModelName.GEMINI_20_FLASH
-                    self.AVAILABLE_MODELS.update(set(GoogleModelName))
+                    self.AVAILABLE_MODELS.update(GoogleModelName)
                 case Provider.VERTEXAI:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = VertexAIModelName.GEMINI_20_FLASH
-                    self.AVAILABLE_MODELS.update(set(VertexAIModelName))
+                    self.AVAILABLE_MODELS.update(VertexAIModelName)
                 case Provider.GROQ:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = GroqModelName.LLAMA_31_8B
-                    self.AVAILABLE_MODELS.update(set(GroqModelName))
+                    self.AVAILABLE_MODELS.update(GroqModelName)
                 case Provider.AWS:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = AWSModelName.BEDROCK_HAIKU
-                    self.AVAILABLE_MODELS.update(set(AWSModelName))
+                    self.AVAILABLE_MODELS.update(AWSModelName)
                 case Provider.OLLAMA:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = OllamaModelName.OLLAMA_GENERIC
-                    self.AVAILABLE_MODELS.update(set(OllamaModelName))
+                    self.AVAILABLE_MODELS.update(OllamaModelName)
                 case Provider.FAKE:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = FakeModelName.FAKE
-                    self.AVAILABLE_MODELS.update(set(FakeModelName))
+                    self.AVAILABLE_MODELS.update(FakeModelName)
                 case Provider.AZURE_OPENAI:
                     if self.DEFAULT_MODEL is None:
                         self.DEFAULT_MODEL = AzureOpenAIModelName.AZURE_GPT_4O_MINI
-                    self.AVAILABLE_MODELS.update(set(AzureOpenAIModelName))
-                    # Validate Azure OpenAI settings if Azure provider is available
+                    self.AVAILABLE_MODELS.update(AzureOpenAIModelName)
+                    # validate Azure settings
                     if not self.AZURE_OPENAI_API_KEY:
                         raise ValueError("AZURE_OPENAI_API_KEY must be set")
                     if not self.AZURE_OPENAI_ENDPOINT:
                         raise ValueError("AZURE_OPENAI_ENDPOINT must be set")
                     if not self.AZURE_OPENAI_DEPLOYMENT_MAP:
                         raise ValueError("AZURE_OPENAI_DEPLOYMENT_MAP must be set")
-
-                    # Parse deployment map if it's a string
                     if isinstance(self.AZURE_OPENAI_DEPLOYMENT_MAP, str):
                         try:
-                            self.AZURE_OPENAI_DEPLOYMENT_MAP = loads(
+                            self.AZURE_OPENAI_DEPLOYMENT_MAP = json.loads(
                                 self.AZURE_OPENAI_DEPLOYMENT_MAP
                             )
                         except Exception as e:
                             raise ValueError(f"Invalid AZURE_OPENAI_DEPLOYMENT_MAP JSON: {e}")
-
-                    # Validate required deployments exist
-                    required_models = {"gpt-4o", "gpt-4o-mini"}
-                    missing_models = required_models - set(self.AZURE_OPENAI_DEPLOYMENT_MAP.keys())
-                    if missing_models:
-                        raise ValueError(f"Missing required Azure deployments: {missing_models}")
                 case _:
                     raise ValueError(f"Unknown provider: {provider}")
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def BASE_URL(self) -> str:
         return f"http://{self.HOST}:{self.PORT}"

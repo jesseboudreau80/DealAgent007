@@ -66,4 +66,5 @@ class Settings(BaseSettings):
             Provider.AZURE_OPENAI: self.AZURE_OPENAI_API_KEY,
         }
 
-    # …any other settings you have below…
+# Instantiate the settings singleton so other modules can import it
+settings = Settings()

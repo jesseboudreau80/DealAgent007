@@ -1,9 +1,9 @@
 # src/core/settings.py
 
 import json
-from typing import Any, Annotated
+from typing import Any
 from dotenv import find_dotenv
-from pydantic import SecretStr, Field, BeforeValidator, computed_field
+from pydantic import SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .enums import (
@@ -24,13 +24,9 @@ from .enums import (
 )
 
 def check_str_is_http(v: str) -> str:
-    """
-    Simple validator to ensure a string starts with http:// or https://
-    """
     if not (v.startswith("http://") or v.startswith("https://")):
         raise ValueError("URL must start with http:// or https://")
     return v
-
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -70,4 +66,4 @@ class Settings(BaseSettings):
             Provider.AZURE_OPENAI: self.AZURE_OPENAI_API_KEY,
         }
 
-    # ... rest of your settings class ...
+    # …any other settings you have below…

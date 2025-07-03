@@ -2,9 +2,13 @@ from datetime import datetime
 from typing import Literal
 
 # from langchain_community.tools import DuckDuckGoSearchResults
-from langchain_community.tools import OpenWeatherMapQueryRun  # keep this if you use weather
+from langchain_community.tools import OpenWeatherMapQueryRun
+from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_community.utilities import OpenWeatherMapAPIWrapper
+from src.agents.weather_tool import get_current_weather
+from src.agents.disaster_history_tool import search_disaster_history
 from langchain_core.language_models.chat_models import BaseChatModel
+
 from langchain_core.messages import AIMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig, RunnableLambda, RunnableSerializable
 from langgraph.graph import END, MessagesState, StateGraph
@@ -26,16 +30,33 @@ class AgentState(MessagesState, total=False):
     remaining_steps: RemainingSteps
 
 
-# web_search = DuckDuckGoSearchResults(name="WebSearch")
-tools = [calculator]
+tools = [
+    calculator,
+    TavilySearchResults(),
+    ToolNode(
+        func=lambda args: get_current_weather(
+            args["city"], settings.OPENWEATHERMAP_API_KEY.get_secret_value()
+        ),
+        name="CurrentWeather",
+        description="Get current weather for a city"
+    ),
+    ToolNode(
+        func=lambda args: search_disaster_history(
+            args["location"], settings.SERPAPI_API_KEY.get_secret_value()
+        ),
+        name="DisasterHistory",
+        description="Lookup recent floods, storms, and disasters for a location"
+    ),
+]
 
-# Add weather tool if API key is set
+# Add forecast tool if API key is set
 # Register for an API key at https://openweathermap.org/api/
 if settings.OPENWEATHERMAP_API_KEY:
     wrapper = OpenWeatherMapAPIWrapper(
         openweathermap_api_key=settings.OPENWEATHERMAP_API_KEY.get_secret_value()
     )
-    tools.append(OpenWeatherMapQueryRun(name="Weather", api_wrapper=wrapper))
+    tools.append(OpenWeatherMapQueryRun(name="WeatherForecast", api_wrapper=wrapper))
+
 
 current_date = datetime.now().strftime("%B %d, %Y")
 instructions = f"""

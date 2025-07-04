@@ -21,6 +21,7 @@ class DatabaseType(str, Enum):
 
 class AllModelEnum(str, Enum):
     GPT_4O_MINI         = "gpt-4o-mini"
+    GPT_3_5_TURBO       = "gpt-3.5-turbo"
     OPENAI_COMPATIBLE   = "openai-compatible"
     DEEPSEEK_CHAT       = "deepseek-chat"
     HAIKU_3             = "haiku-3"

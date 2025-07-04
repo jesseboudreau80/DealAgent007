@@ -1,3 +1,5 @@
+# src/core/llm.py
+
 from functools import cache
 from typing import TypeAlias
 
@@ -26,6 +28,9 @@ from src.schema.models import (
     VertexAIModelName,
 )
 
+# -----------------------------------------------------------------------------
+# Build lookup table: model-enum → API model name string
+# -----------------------------------------------------------------------------
 _MODEL_TABLE = (
     {m: m.value for m in OpenAIModelName}
     | {m: m.value for m in OpenAICompatibleName}
@@ -40,15 +45,9 @@ _MODEL_TABLE = (
     | {m: m.value for m in FakeModelName}
 )
 
-
-class FakeToolModel(FakeListChatModel):
-    def __init__(self, responses: list[str]):
-        super().__init__(responses=responses)
-
-    def bind_tools(self, tools):
-        return self
-
-
+# -----------------------------------------------------------------------------
+# Union type for returned model clients
+# -----------------------------------------------------------------------------
 ModelT: TypeAlias = (
     AzureChatOpenAI
     | ChatOpenAI
@@ -58,17 +57,19 @@ ModelT: TypeAlias = (
     | ChatGroq
     | ChatBedrock
     | ChatOllama
-    | FakeToolModel
+    | FakeListChatModel
 )
 
-
+# -----------------------------------------------------------------------------
+# Factory: pick the right client based on enum, with OpenRouter → OpenAI fallback
+# -----------------------------------------------------------------------------
 @cache
-def get_model(model_name: AllModelEnum, /) -> ModelT:
+def get_model(model_name: AllModelEnum) -> ModelT:
     api_model_name = _MODEL_TABLE.get(model_name)
     if not api_model_name:
         raise ValueError(f"Unsupported model: {model_name}")
 
-    # === OpenAI Direct ===
+    # === 1) OpenAI direct ===
     if model_name in OpenAIModelName:
         return ChatOpenAI(
             model=api_model_name,
@@ -77,19 +78,30 @@ def get_model(model_name: AllModelEnum, /) -> ModelT:
             api_key=settings.OPENAI_API_KEY,
         )
 
-    # === OpenAI-Compatible (e.g. OpenRouter) ===
+    # === 2) OpenAI-Compatible (OpenRouter) w/ fallback to real OpenAI ===
     if model_name in OpenAICompatibleName:
-        if not settings.COMPATIBLE_BASE_URL or not settings.COMPATIBLE_API_KEY:
-            raise ValueError("OpenAI-compatible base URL and API key must be set in .env")
+        # a) Try OpenRouter first
+        if settings.COMPATIBLE_BASE_URL and settings.COMPATIBLE_API_KEY:
+            try:
+                return ChatOpenAI(
+                    model=api_model_name,
+                    temperature=0.5,
+                    streaming=True,
+                    api_key=settings.COMPATIBLE_API_KEY,
+                    base_url=settings.COMPATIBLE_BASE_URL,
+                )
+            except Exception:
+                # on any error, fall through to (b)
+                pass
+        # b) Fallback to official OpenAI
         return ChatOpenAI(
             model=api_model_name,
             temperature=0.5,
             streaming=True,
-            api_key=settings.COMPATIBLE_API_KEY,
-            base_url=settings.COMPATIBLE_BASE_URL,
+            api_key=settings.OPENAI_API_KEY,
         )
 
-    # === Azure OpenAI ===
+    # === 3) Azure OpenAI ===
     if model_name in AzureOpenAIModelName:
         return AzureChatOpenAI(
             azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
@@ -101,7 +113,7 @@ def get_model(model_name: AllModelEnum, /) -> ModelT:
             max_retries=3,
         )
 
-    # === DeepSeek ===
+    # === 4) DeepSeek ===
     if model_name in DeepseekModelName:
         return ChatOpenAI(
             model=api_model_name,
@@ -111,39 +123,42 @@ def get_model(model_name: AllModelEnum, /) -> ModelT:
             base_url="https://api.deepseek.com",
         )
 
-    # === Anthropic ===
+    # === 5) Anthropic ===
     if model_name in AnthropicModelName:
         return ChatAnthropic(model=api_model_name, temperature=0.5, streaming=True)
 
-    # === Google Bard ===
+    # === 6) Google Bard ===
     if model_name in GoogleModelName:
-        return ChatGoogleGenerativeAI(model=api_model_name, temperature=0.5, streaming=True)
+        return ChatGoogleGenerativeAI(
+            model=api_model_name, temperature=0.5, streaming=True
+        )
 
-    # === Google Vertex AI ===
+    # === 7) Google Vertex AI ===
     if model_name in VertexAIModelName:
         return ChatVertexAI(model=api_model_name, temperature=0.5, streaming=True)
 
-    # === Groq ===
+    # === 8) Groq ===
     if model_name in GroqModelName:
         return ChatGroq(
             model=api_model_name,
             temperature=0.0 if model_name.name.startswith("LLAMA_GUARD") else 0.5,
         )
 
-    # === AWS Bedrock ===
+    # === 9) AWS Bedrock ===
     if model_name in AWSModelName:
         return ChatBedrock(model_id=api_model_name, temperature=0.5)
 
-    # === Ollama ===
+    # === 10) Ollama ===
     if model_name in OllamaModelName:
         return ChatOllama(
             model=settings.OLLAMA_MODEL,
             temperature=0.5,
-            base_url=settings.OLLAMA_BASE_URL if settings.OLLAMA_BASE_URL else None,
+            base_url=settings.OLLAMA_BASE_URL or None,
         )
 
-    # === Fake/Test Model ===
+    # === 11) Fake/Test model ===
     if model_name in FakeModelName:
-        return FakeToolModel(responses=["This is a test response from the fake model."])
+        return FakeListChatModel(responses=["This is a test response from the fake model."])
 
+    # Should never happen
     raise ValueError(f"Unsupported model: {model_name}")

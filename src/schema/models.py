@@ -1,4 +1,4 @@
-from enum import StrEnum, auto
+from enum import StrEnum, auto, Enum
 from typing import TypeAlias
 
 
@@ -90,7 +90,7 @@ class OpenAICompatibleName(StrEnum):
     """https://platform.openai.com/docs/guides/text-generation"""
 
     OPENAI_COMPATIBLE = "openai-compatible"
-    OPENAI_GPT_4O     = "openai/gpt-4o"
+    OPENAI_GPT_4O   = "openai/gpt-4o"
 
 
 class FakeModelName(StrEnum):
@@ -99,6 +99,7 @@ class FakeModelName(StrEnum):
     FAKE = "fake"
 
 
+# Type alias of all supported model enums
 AllModelEnum: TypeAlias = (
     OpenAIModelName
     | OpenAICompatibleName
@@ -112,3 +113,8 @@ AllModelEnum: TypeAlias = (
     | OllamaModelName
     | FakeModelName
 )
+
+# Pydantic needs an actual Enum type for Settings.DEFAULT_MODEL
+class AllModelEnum(str, Enum):
+    GPT_4O        = "gpt-4o"
+    GPT_3_5_TURBO = "gpt-3.5-turbo"

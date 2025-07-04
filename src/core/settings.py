@@ -9,24 +9,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from .enums import (
     Provider,
     AllModelEnum,
-    OpenAIModelName,
-    OpenAICompatibleName,
-    DeepseekModelName,
-    AnthropicModelName,
-    GoogleModelName,
-    VertexAIModelName,
-    GroqModelName,
-    AWSModelName,
-    OllamaModelName,
-    FakeModelName,
-    AzureOpenAIModelName,
+    # … any other enums you need here …
     DatabaseType,
 )
-
-def check_str_is_http(v: str) -> str:
-    if not (v.startswith("http://") or v.startswith("https://")):
-        raise ValueError("URL must start with http:// or https://")
-    return v
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -35,10 +20,10 @@ class Settings(BaseSettings):
         validate_default=True,
     )
 
-    # LLM provider keys
+    # — your LLM/API environment variables —
     OPENAI_API_KEY: SecretStr | None = None
     COMPATIBLE_BASE_URL: str | None = None
-    COMPATIBLE_MODEL: str | None = None
+    COMPATIBLE_API_KEY: SecretStr | None = None
     DEEPSEEK_API_KEY: SecretStr | None = None
     ANTHROPIC_API_KEY: SecretStr | None = None
     GOOGLE_API_KEY: SecretStr | None = None
@@ -50,14 +35,16 @@ class Settings(BaseSettings):
     USE_FAKE_MODEL: bool = False
     AZURE_OPENAI_API_KEY: SecretStr | None = None
 
-    # Which model to use by default when none is specified
+    # Which model to use by default when none is specified:
     DEFAULT_MODEL: AllModelEnum = AllModelEnum.GPT_4O_MINI
 
     @computed_field
     def api_keys(self) -> dict[Provider, Any]:
         return {
             Provider.OPENAI: self.OPENAI_API_KEY,
-            Provider.OPENAI_COMPATIBLE: (self.COMPATIBLE_BASE_URL and self.COMPATIBLE_MODEL),
+            Provider.OPENAI_COMPATIBLE: (
+                self.COMPATIBLE_BASE_URL and self.COMPATIBLE_API_KEY
+            ),
             Provider.DEEPSEEK: self.DEEPSEEK_API_KEY,
             Provider.ANTHROPIC: self.ANTHROPIC_API_KEY,
             Provider.GOOGLE: self.GOOGLE_API_KEY,
@@ -69,5 +56,5 @@ class Settings(BaseSettings):
             Provider.AZURE_OPENAI: self.AZURE_OPENAI_API_KEY,
         }
 
-# Instantiate the settings singleton so other modules can import it
+# <— ONLY this at the bottom of settings.py —>
 settings = Settings()

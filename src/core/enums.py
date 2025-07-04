@@ -36,6 +36,7 @@ class OpenAIModelName(str, Enum):
 
 class OpenAICompatibleName(str, Enum):
     OPENAI_COMPATIBLE   = "openai-compatible"
+    OPENAI_GPT_4O     = "openai/gpt-4o"
 
 class DeepseekModelName(str, Enum):
     DEEPSEEK_CHAT       = "deepseek-chat"

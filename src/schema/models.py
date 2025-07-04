@@ -90,6 +90,7 @@ class OpenAICompatibleName(StrEnum):
     """https://platform.openai.com/docs/guides/text-generation"""
 
     OPENAI_COMPATIBLE = "openai-compatible"
+    OPENAI_GPT_4O     = "openai/gpt-4o"
 
 
 class FakeModelName(StrEnum):

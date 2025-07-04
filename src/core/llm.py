@@ -69,6 +69,15 @@ def get_model(model_name: AllModelEnum) -> ModelT:
     if not api_model_name:
         raise ValueError(f"Unsupported model: {model_name}")
 
+    # === 1a) GPT-3.5 Turbo (explicit) ===
+    if model_name == AllModelEnum.GPT_3_5_TURBO:
+        return ChatOpenAI(
+            model=api_model_name,
+            temperature=0.5,
+            streaming=True,
+            api_key=settings.OPENAI_API_KEY,
+        )
+
     # === 1) OpenAI direct ===
     if model_name in OpenAIModelName:
         return ChatOpenAI(

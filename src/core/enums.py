@@ -31,12 +31,15 @@ class AllModelEnum(str, Enum):
 
 class OpenAIModelName(str, Enum):
     GPT_4O              = "gpt-4o"
+    GPT_4O_MINI    = "gpt-4o-mini"
     GPT_3_5_TURBO       = "gpt-3.5-turbo"
     # add other OpenAI model identifiers here
 
 class OpenAICompatibleName(str, Enum):
     OPENAI_COMPATIBLE   = "openai-compatible"
     OPENAI_GPT_4O     = "openai/gpt-4o"
+    OPENAI_GPT_4O_MINI     = "openai/gpt-4o-mini"
+    OPENAI_GPT_3_5_TURBO     = "openai/gpt-3.5-turbo"
 
 class DeepseekModelName(str, Enum):
     DEEPSEEK_CHAT       = "deepseek-chat"

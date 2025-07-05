@@ -19,16 +19,32 @@ class DatabaseType(str, Enum):
     SQLITE   = "sqlite"
     POSTGRES = "postgres"
 
-class AllModelEnum(str, Enum):
+from enum import StrEnum
+
+class AllModelEnum(StrEnum):
     GPT_4O              = "gpt-4o"
     GPT_4O_MINI         = "gpt-4o-mini"
     GPT_3_5_TURBO       = "gpt-3.5-turbo"
     OPENAI_COMPATIBLE   = "openai-compatible"
     DEEPSEEK_CHAT       = "deepseek-chat"
-    HAIKU_3             = "haiku-3"
+    HAIKU_3             = "claude-3-haiku"
+    HAIKU_35            = "claude-3.5-haiku"
+    SONNET_35           = "claude-3.5-sonnet"
+    GEMINI_15_PRO       = "gemini-1.5-pro"
     GEMINI_20_FLASH     = "gemini-2.0-flash"
+    GEMINI_20_FLASH_LITE= "gemini-2.0-flash-lite"
+    GEMINI_25_FLASH     = "gemini-2.5-flash"
+    GEMINI_25_PRO       = "gemini-2.5-pro"
     LLAMA_31_8B         = "llama-3.1-8b"
-    # …etc…
+    LLAMA_33_70B        = "llama-3.3-70b"
+    LLAMA_GUARD_4_12B   = "meta-llama/llama-guard-4-12b"
+    BEDROCK_HAIKU       = "bedrock-3.5-haiku"
+    BEDROCK_SONNET      = "bedrock-3.5-sonnet"
+    OLLAMA_GENERIC      = "ollama"
+    FAKE                = "fake"
+    AZURE_GPT_4O        = "azure-gpt-4o"
+    AZURE_GPT_4O_MINI   = "azure-gpt-4o-mini"
+    AZURE_GPT_3_5_TURBO = "azure-gpt-3.5-turbo"
 
 class OpenAIModelName(str, Enum):
     GPT_4O              = "gpt-4o"

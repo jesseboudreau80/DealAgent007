@@ -1,4 +1,4 @@
-from enum import StrEnum, auto
+from enum import StrEnum, auto, Enum
 from typing import TypeAlias
 
 
@@ -21,6 +21,7 @@ class OpenAIModelName(StrEnum):
 
     GPT_4O_MINI = "gpt-4o-mini"
     GPT_4O = "gpt-4o"
+    GPT_3_5_TURBO = "gpt-3.5-turbo"
 
 
 class AzureOpenAIModelName(StrEnum):
@@ -28,6 +29,7 @@ class AzureOpenAIModelName(StrEnum):
 
     AZURE_GPT_4O = "azure-gpt-4o"
     AZURE_GPT_4O_MINI = "azure-gpt-4o-mini"
+    AZURE_GPT_3_5_TURBO = "azure-gpt-3.5-turbo"
 
 
 class DeepseekModelName(StrEnum):
@@ -91,6 +93,8 @@ class OpenAICompatibleName(StrEnum):
 
     OPENAI_COMPATIBLE = "openai-compatible"
     OPENAI_GPT_4O     = "openai/gpt-4o"
+    OPENAI_GPT_4O_MINI    = "openai/gpt-4o-mini"
+    OPENAI_GPT_3_5_TURBO = "gpt-3.5-turbo"
 
 
 class FakeModelName(StrEnum):
@@ -98,17 +102,8 @@ class FakeModelName(StrEnum):
 
     FAKE = "fake"
 
+# Add Pydantic enum entries so Settings.DEFAULT_MODEL can be 'gpt-4o' or 'gpt-3.5-turbo'
+class AllModelEnum(str, Enum):
+    GPT_4O         = "gpt-4o"
+    GPT_3_5_TURBO  = "gpt-3.5-turbo"
 
-AllModelEnum: TypeAlias = (
-    OpenAIModelName
-    | OpenAICompatibleName
-    | AzureOpenAIModelName
-    | DeepseekModelName
-    | AnthropicModelName
-    | GoogleModelName
-    | VertexAIModelName
-    | GroqModelName
-    | AWSModelName
-    | OllamaModelName
-    | FakeModelName
-)

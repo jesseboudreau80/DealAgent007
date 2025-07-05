@@ -6,12 +6,11 @@ from dotenv import find_dotenv
 from pydantic import SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .enums import (
-    Provider,
-    AllModelEnum,
-    # … any other enums you need here …
-    DatabaseType,
-)
+# keep Provider & DatabaseType here…
+from .enums import Provider, DatabaseType
+
+# import the Pydantic enum that includes gpt-4o & gpt-3.5-turbo
+from src.schema.models import AllModelEnum
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -36,7 +35,7 @@ class Settings(BaseSettings):
     AZURE_OPENAI_API_KEY: SecretStr | None = None
 
     # Which model to use by default when none is specified:
-    DEFAULT_MODEL: AllModelEnum = AllModelEnum.GPT_4O_MINI
+    DEFAULT_MODEL: AllModelEnum = AllModelEnum.GPT_4O
 
     @computed_field
     def api_keys(self) -> dict[Provider, Any]:

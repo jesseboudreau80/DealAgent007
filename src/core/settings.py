@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str | None = None
     USE_FAKE_MODEL: bool = False
     AZURE_OPENAI_API_KEY: SecretStr | None = None
+    OPENWEATHERMAP_API_KEY: SecretStr | None = None
+    TAVILY_API_KEY: SecretStr | None = None
 
     # Which model to use by default when none is specified:
     DEFAULT_MODEL: AllModelEnum = AllModelEnum.GPT_4O

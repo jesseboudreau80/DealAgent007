@@ -1,86 +1,148 @@
-💼 DealAgent007: M&A Research Assistant
+# 🕵️‍♂️ DealAgent007 – AI App Template (React + FastAPI)
 
- 
+A lightweight starter for building **AI-powered web apps** fast:
+- **React** frontend
+- **FastAPI** backend
+- Pluggable **LLM agent(s)** with clean routing (OpenAI or local via AnythingLLM)
 
-DealAgent007 is an AI‑powered Mergers & Acquisitions research assistant, engineered to streamline due diligence, market analysis, valuation guidance, and risk assessment for target businesses—especially in the pet services sector (pet daycares, boarding centers, veterinary clinics, grooming, training, etc.).
+Use this to spin up internal tools, demos, and client-facing chat agents in minutes.
 
-🌐 Live Demo
+> This repo functions as a **Template**. Click **Use this template → Create a new repository** to start fresh.
 
-Access the hosted API on Render (no CORS hassles):https://dealagent007.onrender.com
+---
 
-Interact with multiple agents by changing the path (/invoke, /stream, or /{agent_id}/invoke).
+## 🎯 Why this exists
 
-🚀 Key Features
+- A repeatable scaffold for **React + FastAPI + Agent** apps  
+- Opinionated patterns for **routing, env, and auth**  
+- Clean separation of concerns so you can swap models or UI without redoing infra
 
-Target Screening: Flag acquisition candidates (green/yellow/red) based on financial thresholds, operational metrics, and reputational signals.
+---
 
-Market Intelligence: Automated web searches for competitors, demand trends (boarding, daycare, grooming), partnership opportunities (local vets), and regulatory requirements (licenses, fire inspections, backflow testing).
+## 🧱 What’s included (current)
 
-Valuation Support: Revenue-multiple estimates, DVM‑count benchmarks, and customizable investment criteria (e.g. minimum $800k annual revenue for pet centers, $5M for veterinary practices).
+- Frontend scaffold (React, Vite) with starter pages/components  
+- FastAPI router with `/api/health` and agent endpoint stubs  
+- `.env.example` with sensible variables  
+- CORS + JSON error handling  
+- Basic project structure and README you’re reading now 😄
 
-Risk Assessment: Integrates flood history & disaster links via web search, plus optional real-time weather forecasts.
+---
 
-Streaming UI: Real-time “Thinking…” indicator in React, showing partial tokens as the model responds.
+## 🗺️ Roadmap (polish this template)
 
-Multi-Agent Architecture: Plug in specialized agents (e.g. research_assistant, sop_creator) under one FastAPI service.
+- [ ] Add `/api/agent/chat` endpoint with provider switch (OpenAI / AnythingLLM)  
+- [ ] Add React chat widget and message history  
+- [ ] Add `.devcontainer/` for GitHub Codespaces one-click start  
+- [ ] Add Makefile or taskfile for one-command dev (`make dev`)  
+- [ ] Add auth (JWT session) for protected routes  
+- [ ] Add deploy recipes (Render / Fly.io)  
 
-Secure & Extensible: Header-based bearer auth, pluggable tools (web search, calculator, weather), and Langfuse/LangSmith tracing support.
+---
 
-🛠️ Tech Stack
+## 🛠️ Tech Stack
 
-Agent Framework: LangGraph (stateful flows, tool chaining) + LangChain
+- **Frontend:** React + Vite (Planned: Tailwind)  
+- **Backend:** FastAPI (Python 3.11+)  
+- **AI Layer:** OpenAI API or AnythingLLM router (switchable)  
+- **Tooling:** dotenv, CORS, requests/httpx  
 
-Backend: FastAPI (streaming and non-streaming endpoints)
+---
 
-Frontend: React + Tailwind CSS
+## 📁 Structure (recommended)
 
-DevOps: Render (host API), Node.js for build, uv sync for Python env
+frontend/
+src/
+components/
+pages/
+lib/
+index.html
+package.json
+backend/
+app/
+routers/
+agent.py # POST /api/agent/chat
+health.py # GET /api/health
+models.py
+deps.py
+config.py
+main.py
+.env.example
+README.md
 
-⚙️ Setup & Local Development
+yaml
+Copy
+Edit
 
-1. Clone & Env
+yaml
 
-git clone https://github.com/jesseboudreau80/DealAgent007.git
-cd DealAgent007
-cp .env.example .env  # populate API keys: OPENAI_API_KEY, AUTH_SECRET, SERPAPI_API_KEY, OPENWEATHERMAP_API_KEY
 
-2. Frontend (React)
+---
 
-cd chat-ui
-npm install
-# For local dev with hot reload:
-npm start
-# For production build:
-npm run build
-cd ..
+## ⚙️ Quick Start (Local)
 
-3. Backend (FastAPI)
-
-# Create & sync Python venv via uv (or poetry locally):
-uv sync --frozen
+### Backend
+```bash
+cd backend
+python -m venv .venv
+# macOS/Linux
 source .venv/bin/activate
-# Run service:
-uv run-service      # or: python src/run_service.py
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
 
-4. Streamlit Interface (Optional)
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload
 
-streamlit run src/streamlit_app.py
 
-Your FastAPI docs will be live at http://localhost:8080/docs.
+Frontend
+bash
+Copy
+Edit
+cd frontend
+npm install
+npm run dev
+Visit:
 
-📝 Contributing & Roadmap
+API: http://localhost:8000/api/health
 
-We’re building out specialized agents:
+Web: http://localhost:5173
 
-Research Assistant (M&A flows) — complete.
+🔌 Configure AI Provider
+In .env (backend):
 
-SOP Creator — draft in progress.
+OPENAI_API_KEY=your_key_here
+# or, when using AnythingLLM router
+ANYTHINGLLM_URL=http://localhost:3001
+ANYTHINGLLM_API_KEY=your_router_key
+AGENT_PROVIDER=openai     # or anythingllm
 
-Financial Modeler — upcoming.
 
-Contributions welcome!Please open issues or PRs against this repo.
+🔍 Example Workflow
 
-📜 License
+[React UI] ──> [FastAPI /api/agent/chat] ──> [Provider: OpenAI | AnythingLLM]
+       ^                                                  |
+       |------------------ response + sources ------------|
 
-This project is MIT‑licensed. See the LICENSE file for details.
+
+🧪 Health Check
+
+curl http://localhost:8000/api/health
+# => {"status": "ok"}
+
+
+📚 Notes
+This is a template first and a demo second. It’s intentionally lean so you can fork/clone and move quickly.
+
+🗺️ Future Plans
+Cookie/session auth with role-based agent access
+
+File upload + retrieval-augmented generation (RAG)
+
+Deployment presets for Render (Docker) and Fly.io
+
+Example agents: “Compliance Scout”, “Ops Coach”, “Marketing Buddy”
+
+🪪 License
+MIT
 
